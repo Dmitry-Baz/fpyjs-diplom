@@ -1,43 +1,44 @@
-/**
- * Класс Yandex
- * Используется для управления облаком.
- * Имеет свойство HOST
- * */
 class Yandex {
   static HOST = 'https://cloud-api.yandex.net/v1/disk';
+  static token = '';
 
-  /**
-   * Метод формирования и сохранения токена для Yandex API
-   */
-  static getToken(){
-
+  static getToken() {
+    // В реальном проекте токен можно запрашивать у пользователя через prompt или форму
+    this.token = prompt('Введите OAuth-токен Яндекс.Диска:');
+    return this.token;
   }
 
-  /**
-   * Метод загрузки файла в облако
-   */
-  static uploadFile(path, url, callback){
-
+  static uploadFile(path, url, callback) {
+    if (!this.token) this.getToken();
+    
+    createRequest({
+      method: 'POST',
+      url: `${this.HOST}/resources/upload`,
+      params: { path, url },
+      headers: { Authorization: `OAuth ${this.token}` }
+    }).then(callback).catch(console.error);
   }
 
-  /**
-   * Метод удаления файла из облака
-   */
-  static removeFile(path, callback){
-
+  static removeFile(path, callback) {
+    createRequest({
+      method: 'DELETE',
+      url: `${this.HOST}/resources`,
+      params: { path, permanently: true },
+      headers: { Authorization: `OAuth ${this.token}` }
+    }).then(callback).catch(console.error);
   }
 
-  /**
-   * Метод получения всех загруженных файлов в облаке
-   */
-  static getUploadedFiles(callback){
-
+  static getUploadedFiles(callback) {
+    createRequest({
+      method: 'GET',
+      url: `${this.HOST}/resources/files`,
+      headers: { Authorization: `OAuth ${this.token}` }
+    }).then(callback).catch(console.error);
   }
 
-  /**
-   * Метод скачивания файлов
-   */
-  static downloadFileByUrl(url){
-
+  static downloadFileByUrl(url) {
+    const link = document.createElement('a');
+    link.href = url;
+    link.click();
   }
 }
